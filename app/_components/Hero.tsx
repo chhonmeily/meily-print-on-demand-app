@@ -37,10 +37,11 @@ function Hero() {
 
         <Image
           loading="lazy"
-          src={"/hero.svg"}
+          src={"/hero.png"}
           alt="Hero Image"
-          width={450}
-          height={400}
+          width={350}
+          height={350}
+          className="aspect-square"
         />
       </div>
     </section>

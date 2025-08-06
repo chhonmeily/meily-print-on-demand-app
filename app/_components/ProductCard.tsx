@@ -1,7 +1,8 @@
 import React from "react";
 import { Product } from "./PopularProducts";
 import Image from "next/image";
-
+import { Button } from "@/components/ui/button";
+import { Palette } from "lucide-react";
 type Props = {
   product: Product;
 };
@@ -17,6 +18,10 @@ function ProductCard({ product }: Props) {
         className="h-[130px] w-full aspect-square object-contain"
       />
       <h2 className="font-medium text-lg">{product.title}</h2>
+      <Button className="w-full mt-2">
+        <Palette />
+        Customize
+      </Button>
     </div>
   );
 }
