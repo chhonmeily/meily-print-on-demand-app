@@ -7,11 +7,14 @@ import PopularProducts, { Product } from "@/app/_components/PopularProducts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Palette, ShoppingCart } from "lucide-react";
+import ProductCustomizeStudio from "../_components/ProductCustomizeStudio";
 
 function ProductDetail() {
   const { productId } = useParams();
   const [product, setProduct] = useState<Product>();
   const [loading, setLoading] = useState(false);
+  const [enableCustomizeStudio, setEnableCustomizeStudio] = useState(false);
+
   useEffect(() => {
     productId && GetProductById();
   }, [productId]);
@@ -29,12 +32,16 @@ function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 my-20">
         <div className="flex items-center justify-center border rounded-2xl">
           {product ? (
-            <Image
-              src={product?.productImage[0]?.url}
-              alt={product?.title}
-              width={400}
-              height={400}
-            />
+            !enableCustomizeStudio ? (
+              <Image
+                src={product?.productImage[0]?.url}
+                alt={product?.title}
+                width={400}
+                height={400}
+              />
+            ) : (
+              <ProductCustomizeStudio product={product} />
+            )
           ) : (
             <Skeleton className="w-full h-[300px]"></Skeleton>
           )}
@@ -55,10 +62,18 @@ function ProductDetail() {
                   <Button variant={"outline"}>XL</Button>
                 </div>
               </div>
-              <Button size={"lg"}>
-                <Palette /> Customize
-              </Button>
-              <Button size={"lg"} variant={"outline"}>
+              {!enableCustomizeStudio && (
+                <Button
+                  size={"lg"}
+                  onClick={() => setEnableCustomizeStudio(true)}
+                >
+                  <Palette /> Customize
+                </Button>
+              )}
+              <Button
+                size={"lg"}
+                variant={!enableCustomizeStudio ? "outline" : "default"}
+              >
                 <ShoppingCart /> Add To Cart
               </Button>
             </div>
