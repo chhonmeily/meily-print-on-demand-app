@@ -2,16 +2,49 @@ import { Product } from "@/app/_components/PopularProducts";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Crop, ImageOff, ImageUpscale, Upload } from "lucide-react";
+import {
+  Crop,
+  GalleryVerticalEnd,
+  ImageOff,
+  ImageUpscale,
+  Upload,
+} from "lucide-react";
 import { Canvas, FabricImage } from "fabric";
 import axios from "axios";
 type Props = {
   product: Product;
 };
 
+const DEFAULT_IMAGE =
+  "https://ik.imagekit.io/cml9999/strapi-uploads/cool.png?updatedAt=1754878533521";
+
+const AITransformation = [
+  {
+    name: "BG Remove",
+    icon: ImageOff,
+    imageKitTr: "e-bgremove",
+  },
+  {
+    name: "Upscale",
+    icon: ImageUpscale,
+    imageKitTr: "e-upscale",
+  },
+  {
+    name: "Smart Crop",
+    icon: Crop,
+    imageKitTr: "fo-auto",
+  },
+  {
+    name: "Shadow",
+    icon: GalleryVerticalEnd,
+    imageKitTr: "e-shadow",
+  },
+];
+
 function ProductCustomizeStudio({ product }: Props) {
   const canvasRef = useRef<any>(null);
   const [canvasInstance, setCanvasInstance] = useState<any>(null);
+  const [uploadedImage, setUploadedImage] = useState<string>(DEFAULT_IMAGE);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -33,12 +66,12 @@ function ProductCustomizeStudio({ product }: Props) {
     if (canvasInstance) {
       addDefaultImageToCanvas();
     }
-  }, [canvasInstance]);
+  }, [canvasInstance, uploadedImage]);
 
   const addDefaultImageToCanvas = async () => {
-    const canvasImageRef = await FabricImage.fromURL(
-      "https://ik.imagekit.io/cml9999/strapi-uploads/logoipsum-354.png?updatedAt=1754705261429"
-    );
+    canvasInstance.clear();
+    canvasInstance.renderAll();
+    const canvasImageRef = await FabricImage.fromURL(uploadedImage);
     canvasImageRef.scaleX = 0.3;
     canvasImageRef.scaleY = 0.3;
     canvasInstance.add(canvasImageRef);
@@ -55,6 +88,7 @@ function ProductCustomizeStudio({ product }: Props) {
       //show to canvas
       const uploadedImageUrl = imageRefUrl;
       if (uploadedImageUrl) {
+        setUploadedImage(uploadedImageUrl);
         canvasInstance.clear();
         canvasInstance.renderAll();
         const canvasImageRef = await FabricImage.fromURL(uploadedImageUrl);
@@ -82,6 +116,25 @@ function ProductCustomizeStudio({ product }: Props) {
       console.error("Error uploading image:", error);
       throw error;
     }
+  };
+
+  const OnApplyAITransformation = (transformation: any, add: boolean) => {
+    if (add) {
+      if (uploadedImage?.includes("?tr=")) {
+        const newUrl = uploadedImage + transformation + ",";
+        setUploadedImage(newUrl);
+      } else {
+        const newUrl = uploadedImage + "?tr=" + transformation + ",";
+        setUploadedImage(newUrl);
+      }
+    } else {
+      const newUrl = uploadedImage.replace(transformation, "");
+      setUploadedImage(newUrl);
+    }
+  };
+
+  const isTransformationApplied = (transformation: string) => {
+    return uploadedImage?.includes(transformation) ? false : true;
   };
 
   return (
@@ -117,18 +170,23 @@ function ProductCustomizeStudio({ product }: Props) {
           id="uploadImage"
           onChange={onHandleImageUpload}
         />
-        <div className="flex flex-col p-5 items-center border rounded-lg hover:border-primary cursor-pointer hover:bg-blue-50">
-          <ImageOff />
-          <span className="text-lg">BG Remove</span>
-        </div>
-        <div className="flex flex-col p-5 items-center border rounded-lg hover:border-primary cursor-pointer hover:bg-blue-50">
-          <ImageUpscale />
-          <span className="text-lg">Upscale</span>
-        </div>
-        <div className="flex flex-col p-5 items-center border rounded-lg hover:border-primary cursor-pointer hover:bg-blue-50">
-          <Crop />
-          <span className="text-lg">SmartCrop</span>
-        </div>
+        {AITransformation.map((item, index) => (
+          <button
+            key={item.name}
+            className={`flex flex-col p-5 items-center border rounded-lg hover:border-primary cursor-pointer hover:bg-blue-50 ${
+              uploadedImage?.includes(item.imageKitTr) ? "border-primary" : null
+            }`}
+            onClick={() =>
+              OnApplyAITransformation(
+                item.imageKitTr,
+                isTransformationApplied(item.imageKitTr)
+              )
+            }
+          >
+            <item.icon />
+            <span className="text-lg">{item.name}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
