@@ -6,6 +6,7 @@ import axios from "axios";
 import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
 import { UserDetailContext } from "@/context/UserDetailContext";
+import { CartContext } from "@/context/CartContext";
 
 const menu = [
   {
@@ -39,8 +40,8 @@ export type User = {
 function Header() {
   const [user, setUser] = useState<User>();
 
-  const { UserDetail, setUserDetail } = useContext(UserDetailContext);
-
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const { cart, setCart } = useContext(CartContext);
   useEffect(() => {
     if (typeof window !== undefined) {
       const tokenResponse = JSON.parse(
@@ -88,6 +89,15 @@ function Header() {
     console.log(result.data);
   };
 
+  useEffect(() => {
+    user && GetCartList();
+  }, [user]);
+
+  const GetCartList = async () => {
+    const result = await axios.get("/api/cart?email=" + user?.email);
+    setCart(result.data);
+  };
+
   return (
     <div className="flex items-center justify-between p-4">
       <Image src={"/logo.svg"} alt="logo" width={180} height={180} />
@@ -100,7 +110,12 @@ function Header() {
       </ul>
 
       <div className="flex gap-3 items-center">
-        <ShoppingCart />
+        <div className="flex gap-2 items-center">
+          <ShoppingCart />{" "}
+          <span className="p-1 bg-gray-100 px-2 rounded-2xl">
+            {cart?.length ?? 0}
+          </span>
+        </div>
         {!user ? (
           <Button onClick={() => googleLogin()}>Sign In / Sign Up</Button>
         ) : (

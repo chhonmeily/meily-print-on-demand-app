@@ -13,6 +13,7 @@ import { Canvas, FabricImage } from "fabric";
 import axios from "axios";
 type Props = {
   product: Product;
+  setDesignUrl: any;
 };
 
 const DEFAULT_IMAGE =
@@ -41,7 +42,7 @@ const AITransformation = [
   },
 ];
 
-function ProductCustomizeStudio({ product }: Props) {
+function ProductCustomizeStudio({ product, setDesignUrl }: Props) {
   const canvasRef = useRef<any>(null);
   const [canvasInstance, setCanvasInstance] = useState<any>(null);
   const [uploadedImage, setUploadedImage] = useState<string>(DEFAULT_IMAGE);
@@ -65,6 +66,7 @@ function ProductCustomizeStudio({ product }: Props) {
   useEffect(() => {
     if (canvasInstance) {
       addDefaultImageToCanvas();
+      setDesignUrl(uploadedImage);
     }
   }, [canvasInstance, uploadedImage]);
 

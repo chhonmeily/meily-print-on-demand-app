@@ -1,20 +1,24 @@
 "use client";
 import axios from "axios";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import PopularProducts, { Product } from "@/app/_components/PopularProducts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Palette, ShoppingCart } from "lucide-react";
 import ProductCustomizeStudio from "../_components/ProductCustomizeStudio";
+import { CartContext } from "@/context/CartContext";
+import { UserDetailContext } from "@/context/UserDetailContext";
 
 function ProductDetail() {
   const { productId } = useParams();
   const [product, setProduct] = useState<Product>();
   const [loading, setLoading] = useState(false);
   const [enableCustomizeStudio, setEnableCustomizeStudio] = useState(false);
-
+  const { cart, setCart } = useContext(CartContext);
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const [designUrl, setDesignUrl] = useState<string>();
   useEffect(() => {
     productId && GetProductById();
   }, [productId]);
@@ -25,6 +29,23 @@ function ProductDetail() {
     console.log(result?.data);
     setProduct(result?.data);
     setLoading(false);
+  };
+
+  const AddToCart = async () => {
+    console.log(designUrl);
+    setCart((prev: any) => [
+      ...(Array.isArray(prev) ? prev : []),
+      { design: designUrl, products: product, userEmail: userDetail?.email },
+    ]);
+
+    // Save to DB
+    const result = await axios.post("/api/cart", {
+      product: product,
+      designUrl: designUrl,
+      userEmail: userDetail?.email,
+    });
+
+    console.log(result);
   };
 
   return (
@@ -40,7 +61,10 @@ function ProductDetail() {
                 height={400}
               />
             ) : (
-              <ProductCustomizeStudio product={product} />
+              <ProductCustomizeStudio
+                product={product}
+                setDesignUrl={(url: string) => setDesignUrl(url)}
+              />
             )
           ) : (
             <Skeleton className="w-full h-[300px]"></Skeleton>
@@ -73,6 +97,7 @@ function ProductDetail() {
               <Button
                 size={"lg"}
                 variant={!enableCustomizeStudio ? "outline" : "default"}
+                onClick={() => AddToCart()}
               >
                 <ShoppingCart /> Add To Cart
               </Button>
