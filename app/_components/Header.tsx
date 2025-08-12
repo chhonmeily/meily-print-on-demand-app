@@ -7,6 +7,7 @@ import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
 import { UserDetailContext } from "@/context/UserDetailContext";
 import { CartContext } from "@/context/CartContext";
+import Link from "next/link";
 
 const menu = [
   {
@@ -103,18 +104,22 @@ function Header() {
       <Image src={"/logo.svg"} alt="logo" width={180} height={180} />
       <ul className="flex gap-5">
         {menu.map((item, index) => (
-          <li key={index} className="text-lg">
-            {item.name}
-          </li>
+          <Link href={item.path} key={index}>
+            <li key={index} className="text-lg">
+              {item.name}
+            </li>
+          </Link>
         ))}
       </ul>
 
       <div className="flex gap-3 items-center">
         <div className="flex gap-2 items-center">
-          <ShoppingCart />{" "}
-          <span className="p-1 bg-gray-100 px-2 rounded-2xl">
-            {cart?.length ?? 0}
-          </span>
+          <Link href="/carts" className="flex items-center">
+            <ShoppingCart />{" "}
+            <span className="p-1 bg-gray-100 px-2 rounded-2xl">
+              {cart?.length ?? 0}
+            </span>
+          </Link>
         </div>
         {!user ? (
           <Button onClick={() => googleLogin()}>Sign In / Sign Up</Button>

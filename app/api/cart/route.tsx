@@ -7,7 +7,9 @@ export async function GET(req: NextRequest) {
   const email = searchParams.get("email");
   try {
     const result = await axiosClient.get(
-      "/carts?filters[userEmail][$eq]=" + email
+      "/carts?filters[userEmail][$eq]=" +
+        email +
+        "&populate[products][populate][0]=productImage"
     );
     console.log("result", result.data.data);
     return NextResponse.json(result.data.data);
@@ -36,4 +38,10 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     return NextResponse.json(e);
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  const { documentId } = await req.json();
+  const result = await axiosClient.delete("/carts/" + documentId);
+  return NextResponse.json(result.data);
 }
